@@ -112,8 +112,8 @@ const THEMES=[
  {name:'Pico Gelado',sky:['#8fb8e8','#eef6ff'],sun:'#ffffff',mtn:['#c9dcef','#a9c3de','#8aa9cc'],soil:['#8d9db3','#566579'],top:'#f6fbff',edge:'#c5d9ee',grip:.72,pit:'ice',deco:'pine',fx:'snow',dust:'#ffffff'},
  {name:'Vulcão Noturno',sky:['#150c2b','#6a2240'],sun:'#ffb36b',mtn:['#3a2250','#2c1a3c','#1f1229'],soil:['#4f3d3d','#241b1b'],top:'#8a5440',edge:'#5f372a',grip:.95,pit:'lava',deco:'dead',fx:'ember',dust:'#aa8877',night:1},
 ];
-const params=n=>({len:Math.min(6000+1100*n,26000),slope:Math.min(.24+.03*n,.56),rough:Math.min(1.5+n*.8,8),gap:Math.max(380,1100-65*n),drain:1.7+.14*n,rock:n>=3?Math.max(2.4,8-.45*n):0});
-const TIPS={1:'Acelere →  e incline ↑↓ no ar para pousar de rodas',2:'Buracos! Use a rampa com velocidade',3:'Cuidado: chuva de pedras!',4:'Lama deixa tudo mais lento',6:'Pedras duplas a partir daqui'};
+const params=n=>({len:Math.min(6000+1100*n,26000),slope:Math.min(.2+.02*n,.36),rough:Math.min(1.5+n*.35,4),gap:Math.max(380,1100-65*n),drain:Math.min(1.7+.14*n,4.5),rock:n>=3?Math.max(2.4,8-.45*n):0});
+const TIPS={1:'Acelere →  e incline ↑↓ no ar para pousar de rodas',2:'Buracos! Use a rampa com velocidade',3:'Chuva de pedras! Freie ou acelere pra escapar',4:'Lama deixa tudo mais lento',5:'Combustível curto? Manobras no ar enchem o tanque',6:'Pedras duplas a partir daqui'};
 
 // ---------- level generation ----------
 const STEP=10,PIT_D=260;
@@ -128,7 +128,7 @@ function buildLevel(n){
  // control points: cosine hills, every node is flat so slopes stay bounded
  const ctrl=[[0,0],[700,0]];let cx=700,cy=0;
  while(cx<len-500){
-  const seg=380+rnd()*420,dy=seg*P.slope*(.4+.6*rnd())/1.57;
+  const seg=380+rnd()*420,dy=seg*P.slope*Math.min(1,T.grip+.15)*(.4+.6*rnd())/1.57;
   const down=cy<-1300?true:cy>-80?rnd()<.25:rnd()<.5;
   cy+=down?dy:-dy;cx+=seg;ctrl.push([cx,cy]);
  }
@@ -140,16 +140,16 @@ function buildLevel(n){
   const env=clamp((x-500)/400,0,1)*clamp((len-250-x)/300,0,1);
   h[i]=y0+(y1-y0)*(.5-.5*Math.cos(Math.PI*t))+env*P.rough*(Math.sin(x/40+ph[0])+.6*Math.sin(x/22+ph[1]));
  }
- const flatten=(a,b,y,fade)=>{for(let i=ix(a-fade);i<=ix(b+fade);i++){const x=i*STEP,w=x<a?(x-(a-fade))/fade:x>b?(b+fade-x)/fade:1;h[i]+=(y-h[i])*smooth(clamp(w,0,1))}};
  const obst=[],pits=[],pads=[],muds=[];
  const kinds=['log','log'];if(n>=2)kinds.push('rock','pit','pit');if(n>=3)kinds.push('pit');if(n>=4)kinds.push('mud');
  let x=1000;
  while(x<len-1100){
-  const kind=kinds[Math.floor(rnd()*kinds.length)];
+  let kind=kinds[Math.floor(rnd()*kinds.length)];
+  if(kind==='mud'&&(h[ix(x)]-h[ix(x+300)])/300>.12)kind='log'; // mud on a climb is a wall
   if(kind==='log'||kind==='rock'){
    const cnt=1+(rnd()<.2+n*.04?1:0)+(n>=6&&rnd()<.3?1:0);
    for(let j=0;j<cnt;j++){
-    const hh=Math.min(14+rnd()*(8+n*2),38)*(kind==='rock'?1.1:1),sl=Math.abs(h[ix(x+160)]-h[ix(x+40)])/120,w=hh*Math.PI/clamp(.45-sl,.12,kind==='log'?.3:.36),c=x+w/2;
+    const hh=Math.min(14+rnd()*(8+n*2),38)*(kind==='rock'?1.1:1),sl=(h[ix(x+40)]-h[ix(x+160)])/120,w=hh*Math.PI/clamp(.3+.14*T.grip-sl,.1,kind==='log'?.3:.36),c=x+w/2;
     for(let i=ix(c-w/2);i<=ix(c+w/2);i++){const u=(i*STEP-c)/(w/2);if(Math.abs(u)<=1)h[i]-=hh*(.5+.5*Math.cos(Math.PI*u))}
     obst.push({kind,x:c,w,h:hh,seed:rnd()});x+=w+90+rnd()*80;
    }
@@ -172,7 +172,7 @@ function buildLevel(n){
   }
   x+=P.gap*(.7+rnd()*.7);
  }
- TER=h;L={n,T,P,len,finish:len-250,obst,pits,pads,muds,coins:[],cans:[],cps:[],decor:[],tip:TIPS[n]||''};
+ TER=h;L={n,T,P,len,finish:len-250,est:len/400+.8*obst.length+2*muds.length,obst,pits,pads,muds,coins:[],cans:[],cps:[],decor:[],tip:TIPS[n]||''};
  const safe=(px,m)=>{const p=L.pits.find(p=>px>p.x0-m&&px<p.x1+m);return p?p.x1+m:px};
  // coins: lines along the ground + arcs over pits
  for(let cxp=800;cxp<len-400;cxp+=520+rnd()*300){
@@ -181,8 +181,8 @@ function buildLevel(n){
   for(let j=0;j<c;j++)L.coins.push({x:cxp+j*46,y:ground(cxp+j*46)-46,got:false});
  }
  for(const p of L.pits)for(let j=0;j<5;j++){const t=j/4;L.coins.push({x:p.x0-30+(p.x1-p.x0+60)*t,y:p.lip-38-40*Math.sin(Math.PI*t),got:false})}
- // fuel cans sized so a clean run never starves
- const need=len/300*(P.drain+1.6*.85),nCans=Math.max(1,Math.ceil((need*1.3-100)/35)+(n>=4?0:1));
+ // fuel cans sized so a clean run just makes it; flips cover the mistakes
+ const need=L.est*(P.drain+1.6),nCans=Math.max(1,Math.ceil((need*Math.max(1.15,1.6-.05*n)-100)/35));
  for(let j=0;j<nCans;j++){const px=safe(len*(.12+.78*(j+.5)/nCans),300);L.cans.push({x:px,y:ground(px)-44,got:false})}
  for(const f of [.33,.66]){const px=safe(len*f,260);L.cps.push({x:px,hit:false})}
  for(let dx=80;dx<len+400;dx+=50+rnd()*140)if(!inPit(dx,40))L.decor.push({x:dx,k:Math.floor(rnd()*3),s:.7+rnd()*.8});
@@ -190,7 +190,7 @@ function buildLevel(n){
 }
 
 // ---------- bike physics ----------
-const GRAV=1500,BW=38,AY=10,WR=18,SUSP=16,INERT=2600,CD=.00018,LEAN=26000,KB=900,RR=.06,BRAKE=1100;
+const GRAV=1500,WARN=1.2,FALL=.87,BW=38,AY=10,WR=18,SUSP=16,INERT=2600,CD=.00018,LEAN=26000,KB=900,RR=.06,BRAKE=1100;
 let K={};
 const consts=T=>{const u=save.up;return{ENG:720*(1+.1*u.motor),VMAX:640+25*u.motor,KS:95*(1+.06*u.susp),KD:7*(1+.12*u.susp),MU:1.05*(1+.08*u.grip)*T.grip,CAP:100*(1+.15*u.tank)}};
 const NOINP={gas:0,brake:0,lean:0};
@@ -228,6 +228,7 @@ function stepBike(b,dt,inp){
  if(inp.lean)tq+=inp.lean*LEAN;
  b.w=clamp(b.w+tq/INERT*dt,-9,9);b.w*=1-(touch?1.2:.35)*dt;
  b.vx+=fx*dt;b.vy+=fy*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;b.a+=b.w*dt;
+ if(b.x<40&&b.vx<0){b.x=40;b.vx=0}
  for(let i=0;i<2;i++){
   if(!b.gr[i]){b.sv[i]*=1-(i&&inp.brake?4:.5)*dt;if(!i&&inp.gas&&run.fuel>0)b.sv[i]=Math.min(b.sv[i]+30*dt,42)}
   b.sp[i]+=b.sv[i]*dt;
@@ -241,7 +242,7 @@ function landed(b){
  const rel=wrap(b.a-Math.atan(slope(b.x))),n=Math.floor(Math.abs(b.rot)/TAU+.3);
  if(run.state!=='play')return;
  if(Math.abs(rel)>1.25)return crash('Aterrissagem ruim!');
- if(n){const pts=n*25;run.coins+=pts/5;save.coins+=pts/5;run.flips+=n;pop(b.x,b.y-80,(b.rot<0?'BACKFLIP':'FRONTFLIP')+(n>1?' x'+n:'')+'  +'+pts/5+'🪙','#ffd23f');sfx('coin',1.4)}
+ if(n){const pts=n*25;run.coins+=pts/5;save.coins+=pts/5;run.flips+=n;run.fuel=Math.min(K.CAP,run.fuel+n*10);pop(b.x,b.y-80,(b.rot<0?'BACKFLIP':'FRONTFLIP')+(n>1?' x'+n:'')+'  +'+pts/5+'🪙 +⛽','#ffd23f');sfx('coin',1.4)}
  else if(b.air>.6)shake=Math.max(shake,.25);
 }
 
@@ -281,10 +282,11 @@ function stepWorld(dt,inp){
   run.rockT-=dt;
   if(run.rockT<=0){
    run.rockT=L.P.rock*(.7+Math.random()*.6);
-   const tx=b.x+clamp(b.vx,220,800)*1.5+(Math.random()-.5)*60;
-   if(!inPit(tx,60)&&tx<L.finish-100){
-    run.warns.push({x:tx,t:1.3});
-    if(L.n>=7)run.warns.push({x:tx+140+Math.random()*80,t:1.45});
+   // aimed at where the bike will be on impact: holding the gas gets you hit. Never near a pit run-up.
+   const tx=b.x+clamp(b.vx,220,800)*(WARN+FALL)+(Math.random()-.5)*160;
+   if(!L.pits.some(p=>p.x1>b.x-100&&p.x0<tx+700)&&tx<L.finish-100){
+    run.warns.push({x:tx,t:WARN});
+    if(L.n>=7)run.warns.push({x:tx+140+Math.random()*80,t:WARN+.15});
    }
   }
   for(const w of run.warns)if((w.t-=dt)<=0){spawnRock(w.x);w.dead=1}
@@ -293,7 +295,7 @@ function stepWorld(dt,inp){
  for(const r of run.rocks){
   r.vy+=GRAV*dt;r.y+=r.vy*dt;r.rot+=dt*4;
   if(r.y+r.r>=ground(r.x)){r.dead=1;shake=Math.max(shake,.5);sfx('thud');if(!run.sim)for(let i=0;i<14;i++)spark(r.x,r.y,['#8a8a8a','#6a6a6a','#aaa'][i%3],220)}
-  else for(const[lx,ly,rr]of[[-BW,AY+SUSP],[BW,AY+SUSP],[0,0],[8,-60]]){const p=pointOn(b,lx,ly);if(Math.hypot(p.x-r.x,p.y-r.y)<r.r+rr+8)return crash('Pedrada!')}
+  else for(const[lx,ly,rr]of[[-BW,AY+SUSP,WR],[BW,AY+SUSP,WR],[0,0,14],[8,-60,9]]){const p=pointOn(b,lx,ly);if(Math.hypot(p.x-r.x,p.y-r.y)<r.r+rr-4)return crash('Pedrada!')}
  }
  run.rocks=run.rocks.filter(r=>!r.dead);
  if(b.x>L.finish)win();
@@ -348,7 +350,7 @@ function engineSound(inp){
 // ---------- flow ----------
 function startLevel(n,opt={}){
  buildLevel(n);K=consts(L.T);parts=[];pops=[];
- run={n,b:newBike(150),time:0,coins:0,flips:0,crashes:0,fuel:K.CAP,cp:null,state:'play',stateT:0,why:'',rocks:[],warns:[],rockT:3,demo:!!opt.demo,sim:!!opt.sim,par:L.len/340};
+ run={n,b:newBike(150),time:0,coins:0,flips:0,crashes:0,fuel:K.CAP,cp:null,state:'play',stateT:0,why:'',rocks:[],warns:[],rockT:3,demo:!!opt.demo,sim:!!opt.sim,par:L.est*.95};
  cam.x=run.b.x;cam.y=run.b.y;
  if(!opt.sim){document.body.classList.toggle('play',!opt.demo);show(null)}
  if(!opt.demo)audioInit();
@@ -360,8 +362,7 @@ function respawn(){
 }
 function win(){
  run.state='won';run.stateT=0;sfx('win');
- const frac=L.coins.length?L.coins.filter(c=>c.got).length/L.coins.length:1;
- run.stars=1+(frac>=.6?1:0)+(run.time<=run.par?1:0);
+ run.stars=1+(run.crashes?0:1)+(run.time<=run.par?1:0);
  run.bonus=run.n*10+run.stars*15;save.coins+=run.bonus;
  save.unlocked=Math.max(save.unlocked,run.n+1);
  save.stars[run.n]=Math.max(save.stars[run.n]||0,run.stars);
@@ -431,7 +432,11 @@ for(const b of document.querySelectorAll('#touch button')){
  b.addEventListener('pointerdown',e=>{b.setPointerCapture(e.pointerId);set(1)(e)});
  for(const ev of['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,set(0));
 }
-const autopilot=b=>{const e=wrap(b.a-Math.atan(slope(b.x)));return{gas:1,brake:0,lean:e>.12?-1:e<-.12?1:0}};
+const eta=r=>r.t!=null?r.t+FALL:(Math.sqrt(r.vy*r.vy+2*GRAV*Math.max(0,ground(r.x)-60-r.y))-r.vy)/GRAV;
+const autopilot=b=>{
+ const e=wrap(b.a-Math.atan(slope(b.x))),dodge=[...run.warns,...run.rocks].some(r=>r.x>b.x&&Math.abs(b.x+b.vx*eta(r)-r.x)<130);
+ return{gas:dodge?0:1,brake:dodge&&b.vx>150?1:0,lean:e>.12?-1:e<-.12?1:0};
+};
 const inputNow=()=>run.demo?autopilot(run.b):{gas:keys.gas,brake:keys.brake,lean:keys.fwd-keys.back};
 
 // ---------- rendering ----------
@@ -556,7 +561,7 @@ function drawPickups(){
 }
 function drawRocks(){
  for(const w of run.warns){
-  const sx=wx2s(w.x),a=.4+.6*Math.abs(Math.sin(clock*12));
+  const sx=Math.min(wx2s(w.x),W-24),a=.4+.6*Math.abs(Math.sin(clock*12));
   ctx.strokeStyle=`rgba(255,60,40,${a*.4})`;ctx.lineWidth=2;ctx.setLineDash([8,8]);ctx.beginPath();ctx.moveTo(sx,50);ctx.lineTo(sx,wy2s(ground(w.x)));ctx.stroke();ctx.setLineDash([]);
   ctx.fillStyle=`rgba(255,60,40,${a})`;ctx.beginPath();ctx.moveTo(sx,84);ctx.lineTo(sx+20,52);ctx.lineTo(sx-20,52);ctx.fill();
   ctx.fillStyle='#fff';ctx.font='bold 20px system-ui';ctx.textAlign='center';ctx.fillText('!',sx,78);
@@ -674,7 +679,7 @@ function frame(now){
     const frac=L.coins.filter(c=>c.got).length;
     $('#winTitle').textContent=`Nível ${run.n} concluído!`;
     $('#winStars').textContent='★'.repeat(run.stars)+'☆'.repeat(3-run.stars);
-    $('#winStats').innerHTML=`<div class="stat"><span>Tempo</span><b>${fmtT(run.time)} <small>(par ${fmtT(run.par)})</small></b></div><div class="stat"><span>Moedas</span><b>${frac}/${L.coins.length}</b></div><div class="stat"><span>Manobras</span><b>${run.flips}</b></div><div class="stat"><span>Quedas</span><b>${run.crashes}</b></div><div class="stat"><span>Bônus</span><b>🪙 ${run.bonus}</b></div>`;
+    $('#winStats').innerHTML=`<div class="stat"><span>Tempo</span><b>${fmtT(run.time)} <small>(par ${fmtT(run.par)})</small> ${run.time<=run.par?'★':'☆'}</b></div><div class="stat"><span>Moedas</span><b>${frac}/${L.coins.length}</b></div><div class="stat"><span>Manobras</span><b>${run.flips}</b></div><div class="stat"><span>Quedas</span><b>${run.crashes} ${run.crashes?'☆':'★'}</b></div><div class="stat"><span>Bônus</span><b>🪙 ${run.bonus}</b></div>`;
     document.body.classList.remove('play');show('win');
    }
   }
