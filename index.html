@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
@@ -52,42 +52,42 @@ body.play #pbtn{display:block}
 
 <div class="screen on" id="menu"><div class="card">
   <h1>SERRA RUSH</h1>
-  <p class="sub">Suba, desça, salte buracos e sobreviva a cada montanha.</p>
-  <button class="btn" data-act="play" id="playBtn">▶ Jogar</button>
-  <div class="row"><button class="btn alt" data-act="levels">Níveis</button><button class="btn alt" data-act="garage">Garagem</button></div>
-  <button class="btn alt" data-act="mute" id="muteBtn">Som: ligado</button>
-  <div class="keys"><b>→ / D</b> acelera · <b>← / A</b> freia e ré<br><b>↑ / W</b> inclina pra trás · <b>↓ / S</b> inclina pra frente<br><b>R</b> reinicia · <b>Esc</b> pausa · <b>M</b> som</div>
+  <p class="sub">Climb, descend, jump the pits and survive every mountain.</p>
+  <button class="btn" data-act="play" id="playBtn">▶ Play</button>
+  <div class="row"><button class="btn alt" data-act="levels">Levels</button><button class="btn alt" data-act="garage">Garage</button></div>
+  <button class="btn alt" data-act="mute" id="muteBtn">Sound: on</button>
+  <div class="keys"><b>→ / D</b> gas · <b>← / A</b> brake and reverse<br><b>↑ / W</b> lean back · <b>↓ / S</b> lean forward<br><b>R</b> restart · <b>Esc</b> pause · <b>M</b> sound</div>
 </div></div>
 
 <div class="screen" id="levels"><div class="card">
-  <h2>Níveis</h2><div class="grid" id="lvGrid"></div>
-  <button class="btn alt" data-act="menu">Voltar</button>
+  <h2>Levels</h2><div class="grid" id="lvGrid"></div>
+  <button class="btn alt" data-act="menu">Back</button>
 </div></div>
 
 <div class="screen" id="garage"><div class="card">
-  <h2>Garagem</h2><p class="wallet" id="wallet"></p><div id="ups"></div>
-  <button class="btn alt" data-act="menu">Voltar</button>
+  <h2>Garage</h2><p class="wallet" id="wallet"></p><div id="ups"></div>
+  <button class="btn alt" data-act="menu">Back</button>
 </div></div>
 
 <div class="screen" id="pause"><div class="card">
-  <h2>Pausado</h2>
-  <button class="btn" data-act="resume">Continuar</button>
-  <button class="btn alt" data-act="restart">Reiniciar nível</button>
+  <h2>Paused</h2>
+  <button class="btn" data-act="resume">Resume</button>
+  <button class="btn alt" data-act="restart">Restart level</button>
   <button class="btn alt" data-act="menu">Menu</button>
 </div></div>
 
 <div class="screen" id="crash"><div class="card">
   <h2 id="crashWhy"></h2><p id="crashInfo"></p>
-  <button class="btn" data-act="respawn" id="respawnBtn">Continuar do checkpoint</button>
-  <button class="btn alt" data-act="restart">Reiniciar nível</button>
+  <button class="btn" data-act="respawn" id="respawnBtn">Continue from checkpoint</button>
+  <button class="btn alt" data-act="restart">Restart level</button>
   <button class="btn alt" data-act="menu">Menu</button>
 </div></div>
 
 <div class="screen" id="win"><div class="card">
   <h2 id="winTitle"></h2><div class="stars" id="winStars"></div>
   <div id="winStats"></div>
-  <button class="btn" data-act="next">Próximo nível ▶</button>
-  <div class="row"><button class="btn alt" data-act="restart">Repetir</button><button class="btn alt" data-act="garage">Garagem</button></div>
+  <button class="btn" data-act="next">Next level ▶</button>
+  <div class="row"><button class="btn alt" data-act="restart">Retry</button><button class="btn alt" data-act="garage">Garage</button></div>
   <button class="btn alt" data-act="menu">Menu</button>
 </div></div>
 
@@ -107,13 +107,13 @@ addEventListener('beforeunload',persist);
 
 // ---------- themes & level params ----------
 const THEMES=[
- {name:'Vale Verde',sky:['#6ec6ff','#dff3ff'],sun:'#fff2a8',mtn:['#a9cfe0','#86b7a5','#63a06b'],soil:['#7a4f2b','#472d19'],top:'#5cbf3f',edge:'#3f9a2c',grip:1,pit:'water',deco:'tree',fx:null,dust:'#c9b48a'},
- {name:'Deserto Seco',sky:['#ffae63','#ffeccb'],sun:'#fff7d6',mtn:['#e7b585','#d99a63','#c47e4a'],soil:['#c98a4b','#8c5629'],top:'#edc872',edge:'#cfa656',grip:.9,pit:'spikes',deco:'cactus',fx:'dust',dust:'#e8c88a'},
- {name:'Pico Gelado',sky:['#8fb8e8','#eef6ff'],sun:'#ffffff',mtn:['#c9dcef','#a9c3de','#8aa9cc'],soil:['#8d9db3','#566579'],top:'#f6fbff',edge:'#c5d9ee',grip:.72,pit:'ice',deco:'pine',fx:'snow',dust:'#ffffff'},
- {name:'Vulcão Noturno',sky:['#150c2b','#6a2240'],sun:'#ffb36b',mtn:['#3a2250','#2c1a3c','#1f1229'],soil:['#4f3d3d','#241b1b'],top:'#8a5440',edge:'#5f372a',grip:.95,pit:'lava',deco:'dead',fx:'ember',dust:'#aa8877',night:1},
+ {name:'Green Valley',sky:['#6ec6ff','#dff3ff'],sun:'#fff2a8',mtn:['#a9cfe0','#86b7a5','#63a06b'],soil:['#7a4f2b','#472d19'],top:'#5cbf3f',edge:'#3f9a2c',grip:1,pit:'water',deco:'tree',fx:null,dust:'#c9b48a'},
+ {name:'Dry Desert',sky:['#ffae63','#ffeccb'],sun:'#fff7d6',mtn:['#e7b585','#d99a63','#c47e4a'],soil:['#c98a4b','#8c5629'],top:'#edc872',edge:'#cfa656',grip:.9,pit:'spikes',deco:'cactus',fx:'dust',dust:'#e8c88a'},
+ {name:'Frozen Peak',sky:['#8fb8e8','#eef6ff'],sun:'#ffffff',mtn:['#c9dcef','#a9c3de','#8aa9cc'],soil:['#8d9db3','#566579'],top:'#f6fbff',edge:'#c5d9ee',grip:.72,pit:'ice',deco:'pine',fx:'snow',dust:'#ffffff'},
+ {name:'Night Volcano',sky:['#150c2b','#6a2240'],sun:'#ffb36b',mtn:['#3a2250','#2c1a3c','#1f1229'],soil:['#4f3d3d','#241b1b'],top:'#8a5440',edge:'#5f372a',grip:.95,pit:'lava',deco:'dead',fx:'ember',dust:'#aa8877',night:1},
 ];
 const params=n=>({len:Math.min(6000+1100*n,26000),slope:Math.min(.2+.02*n,.36),rough:Math.min(1.5+n*.35,4),gap:Math.max(380,1100-65*n),drain:Math.min(1.7+.14*n,4.5),rock:n>=3?Math.max(2.4,8-.45*n):0});
-const TIPS={1:'Acelere →  e incline ↑↓ no ar para pousar de rodas',2:'Buracos! Use a rampa com velocidade',3:'Chuva de pedras! Freie ou acelere pra escapar',4:'Lama deixa tudo mais lento',5:'Combustível curto? Manobras no ar enchem o tanque',6:'Pedras duplas a partir daqui'};
+const TIPS={1:'Hit the gas →  and lean ↑↓ in the air to land on your wheels',2:'Pits! Hit the ramp with speed',3:'Rockfall! Brake or speed up to escape',4:'Mud slows everything down',5:'Low on fuel? Air tricks fill the tank',6:'Double rocks from here on'};
 
 // ---------- level generation ----------
 const STEP=10,PIT_D=260;
@@ -241,7 +241,7 @@ function stepBike(b,dt,inp){
 function landed(b){
  const rel=wrap(b.a-Math.atan(slope(b.x))),n=Math.floor(Math.abs(b.rot)/TAU+.3);
  if(run.state!=='play')return;
- if(Math.abs(rel)>1.25)return crash('Aterrissagem ruim!');
+ if(Math.abs(rel)>1.25)return crash('Bad landing!');
  if(n){const pts=n*25;run.coins+=pts/5;save.coins+=pts/5;run.flips+=n;run.fuel=Math.min(K.CAP,run.fuel+n*10);pop(b.x,b.y-80,(b.rot<0?'BACKFLIP':'FRONTFLIP')+(n>1?' x'+n:'')+'  +'+pts/5+'🪙 +⛽','#ffd23f');sfx('coin',1.4)}
  else if(b.air>.6)shake=Math.max(shake,.25);
 }
@@ -270,13 +270,13 @@ function stepWorld(dt,inp){
  if(!playing)return;
  // pickups
  for(const c of L.coins)if(!c.got&&Math.abs(c.x-b.x)<46&&Math.abs(c.y-b.y)<46){c.got=true;run.coins++;save.coins++;sfx('coin',1);if(!run.sim)for(let i=0;i<6;i++)spark(c.x,c.y,'#ffd23f',90)}
- for(const c of L.cans)if(!c.got&&Math.abs(c.x-b.x)<52&&Math.abs(c.y-b.y)<52){c.got=true;run.fuel=Math.min(K.CAP,run.fuel+35);pop(c.x,c.y-30,'+COMBUSTÍVEL','#7dffb0');sfx('fuel')}
+ for(const c of L.cans)if(!c.got&&Math.abs(c.x-b.x)<52&&Math.abs(c.y-b.y)<52){c.got=true;run.fuel=Math.min(K.CAP,run.fuel+35);pop(c.x,c.y-30,'+FUEL','#7dffb0');sfx('fuel')}
  for(const c of L.cps)if(!c.hit&&b.x>c.x){c.hit=true;run.cp=c.x;pop(c.x,ground(c.x)-120,'CHECKPOINT','#fff');sfx('fuel')}
  // hazards
- for(const[lx,ly,r]of[[8,-62,9],[-22,-26,6],[34,-24,5]]){const p=pointOn(b,lx,ly);if(p.y+r>ground(p.x))return crash('Capotou!')}
- for(const p of L.pits)if(b.x>p.x0&&b.x<p.x1&&b.y>p.y0+110)return crash('Caiu no buraco!');
- if(b.y>ground(b.x)+320)return crash('Caiu no buraco!');
- if(run.fuel<=0&&Math.hypot(b.vx,b.vy)<25){run.dry=(run.dry||0)+dt;if(run.dry>1.4)return crash('Sem combustível!')}else run.dry=0;
+ for(const[lx,ly,r]of[[8,-62,9],[-22,-26,6],[34,-24,5]]){const p=pointOn(b,lx,ly);if(p.y+r>ground(p.x))return crash('Flipped over!')}
+ for(const p of L.pits)if(b.x>p.x0&&b.x<p.x1&&b.y>p.y0+110)return crash('Fell in the pit!');
+ if(b.y>ground(b.x)+320)return crash('Fell in the pit!');
+ if(run.fuel<=0&&Math.hypot(b.vx,b.vy)<25){run.dry=(run.dry||0)+dt;if(run.dry>1.4)return crash('Out of fuel!')}else run.dry=0;
  // rockfall
  if(L.P.rock){
   run.rockT-=dt;
@@ -295,7 +295,7 @@ function stepWorld(dt,inp){
  for(const r of run.rocks){
   r.vy+=GRAV*dt;r.y+=r.vy*dt;r.rot+=dt*4;
   if(r.y+r.r>=ground(r.x)){r.dead=1;shake=Math.max(shake,.5);sfx('thud');if(!run.sim)for(let i=0;i<14;i++)spark(r.x,r.y,['#8a8a8a','#6a6a6a','#aaa'][i%3],220)}
-  else for(const[lx,ly,rr]of[[-BW,AY+SUSP,WR],[BW,AY+SUSP,WR],[0,0,14],[8,-60,9]]){const p=pointOn(b,lx,ly);if(Math.hypot(p.x-r.x,p.y-r.y)<r.r+rr-4)return crash('Pedrada!')}
+  else for(const[lx,ly,rr]of[[-BW,AY+SUSP,WR],[BW,AY+SUSP,WR],[0,0,14],[8,-60,9]]){const p=pointOn(b,lx,ly);if(Math.hypot(p.x-r.x,p.y-r.y)<r.r+rr-4)return crash('Hit by a rock!')}
  }
  run.rocks=run.rocks.filter(r=>!r.dead);
  if(b.x>L.finish)win();
@@ -374,8 +374,8 @@ function show(id){for(const s of document.querySelectorAll('.screen'))s.classLis
 function toMenu(){
  persist();document.body.classList.remove('play');
  startLevel(1,{demo:true});
- $('#playBtn').textContent='▶ Jogar nível '+save.unlocked;
- $('#muteBtn').textContent='Som: '+(save.mute?'desligado':'ligado');
+ $('#playBtn').textContent='▶ Play level '+save.unlocked;
+ $('#muteBtn').textContent='Sound: '+(save.mute?'off':'on');
  show('menu');
 }
 function renderLevels(){
@@ -386,7 +386,7 @@ function renderLevels(){
   b.onclick=()=>startLevel(i);g.appendChild(b);
  }
 }
-const UPS=[{k:'motor',n:'Motor',d:'+10% de potência'},{k:'susp',n:'Suspensão',d:'Pousos mais macios'},{k:'tank',n:'Tanque',d:'+15% de combustível'},{k:'grip',n:'Pneus',d:'+8% de aderência'}];
+const UPS=[{k:'motor',n:'Engine',d:'+10% power'},{k:'susp',n:'Suspension',d:'Softer landings'},{k:'tank',n:'Tank',d:'+15% fuel'},{k:'grip',n:'Tires',d:'+8% grip'}];
 const COST=[80,160,300,520,850];
 function renderGarage(){
  $('#wallet').textContent='🪙 '+save.coins;
@@ -403,7 +403,7 @@ const ACT={
  play(){startLevel(save.unlocked)},
  levels(){renderLevels();show('levels')},
  garage(){renderGarage();show('garage')},
- mute(){save.mute=!save.mute;persist();$('#muteBtn').textContent='Som: '+(save.mute?'desligado':'ligado')},
+ mute(){save.mute=!save.mute;persist();$('#muteBtn').textContent='Sound: '+(save.mute?'off':'on')},
  menu:toMenu,
  pause(){if(run&&!run.demo&&(run.state==='play')){paused=true;show('pause')}},
  resume(){paused=false;show(null)},
@@ -633,9 +633,9 @@ function drawHUD(){
  ctx.textAlign='left';ctx.fillStyle='#0008';ctx.beginPath();ctx.roundRect(pad,pad,Math.min(230,W*.45),26,8);ctx.fill();
  const fw=Math.min(230,W*.45)-8,fr=run.fuel/K.CAP,low=fr<.25&&Math.floor(clock*4)%2;
  ctx.fillStyle=low?'#ff3b30':fr<.5?'#ffb400':'#2bb673';ctx.beginPath();ctx.roundRect(pad+4,pad+4,Math.max(4,fw*fr),18,6);ctx.fill();
- ctx.fillStyle='#fff';ctx.font='bold 13px system-ui';ctx.fillText('⛽ COMBUSTÍVEL',pad+10,pad+18);
+ ctx.fillStyle='#fff';ctx.font='bold 13px system-ui';ctx.fillText('⛽ FUEL',pad+10,pad+18);
  ctx.font='bold 15px system-ui';ctx.fillStyle='#fff';ctx.strokeStyle='#000a';ctx.lineWidth=3;
- const info=`NÍVEL ${run.n} · ${T.name}`;ctx.strokeText(info,pad,pad+50);ctx.fillText(info,pad,pad+50);
+ const info=`LEVEL ${run.n} · ${T.name}`;ctx.strokeText(info,pad,pad+50);ctx.fillText(info,pad,pad+50);
  ctx.textAlign='right';const r=W-66;
  for(const[t,y]of[[`🪙 ${run.coins}`,24],[fmtT(run.time),46],[`${Math.round(Math.hypot(b.vx,b.vy)*.12)} km/h`,68]]){ctx.strokeText(t,r,y);ctx.fillText(t,r,y)}
  // progress
@@ -649,7 +649,7 @@ function drawHUD(){
  if(run.time<3.2&&run.state==='play'){
   ctx.globalAlpha=clamp(3.2-run.time,0,1);ctx.textAlign='center';
   ctx.font='bold 40px system-ui';ctx.lineWidth=6;ctx.fillStyle='#fff';
-  ctx.strokeText(`NÍVEL ${run.n}`,W/2,H*.3);ctx.fillText(`NÍVEL ${run.n}`,W/2,H*.3);
+  ctx.strokeText(`LEVEL ${run.n}`,W/2,H*.3);ctx.fillText(`LEVEL ${run.n}`,W/2,H*.3);
   if(L.tip){ctx.font='bold 18px system-ui';ctx.lineWidth=4;ctx.strokeText(L.tip,W/2,H*.3+32);ctx.fillText(L.tip,W/2,H*.3+32)}
   ctx.globalAlpha=1;
  }
@@ -669,7 +669,7 @@ function frame(now){
   if(run.state==='crashed'&&run.stateT>.9&&!run.shown){
    run.shown=1;
    if(run.demo)startLevel(1,{demo:true});
-   else{persist();$('#crashWhy').textContent='💥 '+run.why;$('#crashInfo').textContent=`Quedas: ${run.crashes} · 🪙 ${run.coins}`;$('#respawnBtn').textContent=run.cp?'Continuar do checkpoint':'Tentar de novo';show('crash')}
+   else{persist();$('#crashWhy').textContent='💥 '+run.why;$('#crashInfo').textContent=`Crashes: ${run.crashes} · 🪙 ${run.coins}`;$('#respawnBtn').textContent=run.cp?'Continue from checkpoint':'Try again';show('crash')}
   }
   if(run.state==='play'||run.state==='won')run.shown=0;
   if(run.state==='won'&&run.stateT>1.8&&!run.shown){
@@ -677,9 +677,9 @@ function frame(now){
    if(run.demo)startLevel(1,{demo:true});
    else{
     const frac=L.coins.filter(c=>c.got).length;
-    $('#winTitle').textContent=`Nível ${run.n} concluído!`;
+    $('#winTitle').textContent=`Level ${run.n} complete!`;
     $('#winStars').textContent='★'.repeat(run.stars)+'☆'.repeat(3-run.stars);
-    $('#winStats').innerHTML=`<div class="stat"><span>Tempo</span><b>${fmtT(run.time)} <small>(par ${fmtT(run.par)})</small> ${run.time<=run.par?'★':'☆'}</b></div><div class="stat"><span>Moedas</span><b>${frac}/${L.coins.length}</b></div><div class="stat"><span>Manobras</span><b>${run.flips}</b></div><div class="stat"><span>Quedas</span><b>${run.crashes} ${run.crashes?'☆':'★'}</b></div><div class="stat"><span>Bônus</span><b>🪙 ${run.bonus}</b></div>`;
+    $('#winStats').innerHTML=`<div class="stat"><span>Time</span><b>${fmtT(run.time)} <small>(par ${fmtT(run.par)})</small> ${run.time<=run.par?'★':'☆'}</b></div><div class="stat"><span>Coins</span><b>${frac}/${L.coins.length}</b></div><div class="stat"><span>Tricks</span><b>${run.flips}</b></div><div class="stat"><span>Crashes</span><b>${run.crashes} ${run.crashes?'☆':'★'}</b></div><div class="stat"><span>Bonus</span><b>🪙 ${run.bonus}</b></div>`;
     document.body.classList.remove('play');show('win');
    }
   }
